@@ -4,7 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>আমার গানের খাতা (ক্লাউড ব্যাকআপ)</title>
+    
+    <!-- PWA Meta Tags & Icons -->
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./icons/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
     <style>
+
         :root {
             --site-bg: #fdfaf0;
             --header-bg: #2c3e50;
@@ -284,8 +295,8 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ⚙️ আপনার ফায়ারবেস কনফিগারেশন এখানে সঠিক নিয়মে বসিয়ে দিন
-        const firebaseConfig = {
+        // ⚙️ আপনার ফায়ারবেস কনফিগারেশন এখানে সঠিক নিয়মে বসিয়ে দিন
+         const firebaseConfig = {
             apiKey: "AIzaSyADSxl61rvEXNArEWyDsjw0Ghn5C5iZcVY",
   authDomain: "ganer-khata.firebaseapp.com",
   projectId: "ganer-khata",
@@ -300,7 +311,7 @@
         let currentUserObj = null;
 
         function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+\$/;
             return re.test(email);
         }
 
@@ -308,16 +319,16 @@
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passInput').value;
             
-            if(!email) { alert("দয়া করে প্রথমে ইমেইল ঠিকানাটি লিখুন।"); return; }
-            if(!validateEmail(email)) { alert("আপনার ইমেইল ফরম্যাটটি সঠিক নয়! (যেমন: name@example.com)"); return; }
-            if(!password || password.length < 6) { alert("পাসওয়ার্ডটি অন্তত ৬ অক্ষরের হতে হবে।"); return; }
+            if(!email) { alert("দয়া করে প্রথমে ইমেইল ঠিকানাটি লিখুন।"); return; }
+            if(!validateEmail(email)) { alert("আপনার ইমেইল ফরম্যাটটি সঠিক নয়! (যেমন: name@example.com)"); return; }
+            if(!password || password.length < 6) { alert("পাসওয়ার্ডটি অন্তত ৬ অক্ষরের হতে হবে।"); return; }
             
             try {
                 if(type === 'login') {
                     await signInWithEmailAndPassword(auth, email, password);
                 } else {
                     await createUserWithEmailAndPassword(auth, email, password);
-                    alert("অভিনন্দন! অ্যাকাউন্ট তৈরি সফল হয়েছে।");
+                    alert("অভিনন্দন! অ্যাকাউন্ট তৈরি সফল হয়েছে।");
                 }
             } catch (error) { 
                 alert("লগইন ব্যর্থ: " + error.message); 
@@ -330,7 +341,7 @@
                 await signInWithPopup(auth, provider); 
             } catch (error) { 
                 if(error.code === 'auth/unauthorized-domain') {
-                    alert("ত্রুটি: এই ডোমেইনটি ফায়ারবেস কনসোলে Authorized করা নেই। অনুগ্রহ করে Firebase Console > Authentication > Settings এ গিয়ে ডোমেইনটি অ্যাড করুন।");
+                    alert("ত্রুটি: এই ডোমেইনটি ফায়ারবেস কনসোলে Authorized করা নেই। অনুগ্রহ করে Firebase Console > Authentication > Settings এ গিয়ে ডোমেইনটি অ্যাড করুন।");
                 } else {
                     alert("গুগল লগইন ব্যর্থ: " + error.message); 
                 }
@@ -343,7 +354,7 @@
                 await signInWithPopup(auth, provider); 
             } catch (error) { 
                 if(error.code === 'auth/unauthorized-domain') {
-                    alert("ত্রুটি: এই ডোমেইনটি ফায়ারবেস কনসোলে Authorized করা নেই।");
+                    alert("ত্রুটি: এই ডোমেইনটি ফায়ারবেস কনসোলে Authorized করা নেই।");
                 } else {
                     alert("ফেসবুক লগইন ব্যর্থ: " + error.message); 
                 }
@@ -352,10 +363,10 @@
 
         window.forgotPassword = async () => {
             const email = document.getElementById('emailInput').value.trim();
-            if (!email || !validateEmail(email)) { alert("পাসওয়ার্ড রিসেট লিংক পেতে প্রথমে উপরের বক্সে সঠিক ইমেইলটি লিখুন।"); return; }
+            if (!email || !validateEmail(email)) { alert("পাসওয়ার্ড রিসেট লিংক পেতে প্রথমে উপরের বক্সে সঠিক ইমেইলটি লিখুন।"); return; }
             try {
                 await sendPasswordResetEmail(auth, email);
-                alert("পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে! চেক করুন।");
+                alert("পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে! চেক করুন।");
             } catch (error) { alert("ত্রুটি: " + error.message); }
         };
 
@@ -396,11 +407,11 @@
 
 <div id="authContainer">
     <h2>🎵 আমার গানের খাতা 🎶</h2>
-    <p>ক্লাউড ব্যাকআপের জন্য লগইন/রেজিস্ট্রেশন করুন</p>
+    <p>ক্লাউড ব্যাকআপের জন্য লগইন/রেজিস্ট्रেশন করুন</p>
     
     <input type="email" id="emailInput" placeholder="আপনার ইমেইল...">
     <div class="password-wrapper">
-        <input type="password" id="passInput" placeholder="পাসওয়ার্ড...">
+        <input type="password" id="passInput" placeholder="পাসওয়ার্ড...">
         <span class="toggle-password" id="eyeIcon" onclick="togglePasswordVisibility()">👁️</span>
     </div>
     
@@ -408,7 +419,7 @@
     <button class="btn" style="width: 100%; background: #9b59b6;" onclick="handleAuth('register')">নতুন অ্যাকাউন্ট খুলুন</button>
     
     <p style="margin-top: 15px; font-size: 13px;">
-        <span style="color: #d63031; cursor: pointer; font-weight: bold; text-decoration: underline;" onclick="forgotPassword()">পাসওয়ার্ড ভুলে গেছেন?</span>
+        <span style="color: #d63031; cursor: pointer; font-weight: bold; text-decoration: underline;" onclick="forgotPassword()">পাসওয়ার্ড ভুলে গেছেন?</span>
     </p>
 
     <div class="divider">অথবা সোশ্যাল লগইন</div>
@@ -620,12 +631,12 @@
             if(currentTab === 'want-to-learn') actionBtn = `<button class="btn" style="background:#9b59b6; margin-right:5px; padding:6px 10px; font-size:12px;" onclick="event.stopPropagation(); moveSongStatus('${song.id}', 'learning')">Send</button>`;
 
             div.innerHTML = `
-                <span style="font-weight:bold; flex:1; font-size:14px;" onclick="${currentTab !== 'want-to-learn' ? `openSongDetail('${song.id}')` : ''}">🎵 ${song.title}</span>
+                <span style="font-weight:bold; flex:1; font-size:14px;" onclick="${currentTab !== 'want-to-learn' ? `openSongDetail('\${song.id}')` : ''}">🎵 ${song.title}</span>
                 <div style="display:flex; align-items:center;">
                     ${actionBtn}
                     <span class="three-dot" onclick="toggleMenu(event, 'songMenu_${index}')">⋮</span>
                     <div id="songMenu_${index}" class="dropdown-menu">
-                        ${currentTab !== 'want-to-learn' ? `<div onclick="openPlaylistModal('${song.id}')">📂 লিস্টে যোগ</div>` : ''}
+                        ${currentTab !== 'want-to-learn' ? `<div onclick="openPlaylistModal('\${song.id}')">📂 লিস্টে যোগ</div>` : ''}
                         <div onclick="editSongTitle('${song.id}')">⚙️ এডিট নাম</div>
                         <div onclick="deleteSong('${song.id}')">🗑️ ডিলিট</div>
                     </div>
@@ -674,7 +685,7 @@
 
     function addSongToCustomList(listName) {
         if(!appData.customLists[listName].includes(selectedSongForList)) {
-            appData.customLists[listName].push(selectedSongForList); saveToStorage(); alert("লিস্টে যোগ করা হয়েছে!");
+            appData.customLists[listName].push(selectedSongForList); saveToStorage(); alert("লিস্টে যোগ করা হয়েছে!");
         } else { alert("অলরেডি লিস্টে আছে।"); }
         closeModal();
     }
@@ -707,88 +718,18 @@
         const input = document.getElementById('newListName'); const name = input.value.trim();
         if(name && !appData.customLists[name]) { appData.customLists[name] = []; saveToStorage(); renderCustomListsView(); }
     }
-
-    function deleteCustomList(name) {
-        if(confirm(`"${name}" লিস্টটি মুছতে চান?`)) { delete appData.customLists[name]; saveToStorage(); renderCustomListsView(); }
-    }
-
-    function openCustomListSongs(listName) {
-        document.getElementById('viewTitle').innerText = `লিস্ট: ${listName}`;
-        const container = document.getElementById('listContainer'); container.innerHTML = '';
-        appData.customLists[listName].forEach(id => {
-            const song = appData.songs.find(s => s.id === id);
-            if(song) {
-                const div = document.createElement('div'); div.className = 'list-item';
-                div.innerHTML = `<span style="font-size:14px;">🎵 ${song.title} <small>(${song.category})</small></span>`;
-                div.onclick = () => openSongDetail(song.id);
-                container.appendChild(div);
-            }
-        });
-    }
-
-    function openSongDetail(id) {
-        currentSongId = id; const song = appData.songs.find(s => s.id === id);
-        document.getElementById('listView').classList.add('hidden'); document.getElementById('detailView').classList.remove('hidden');
-        document.getElementById('detTitle').innerText = `🎤 ${song.title}`;
-        document.getElementById('detTaal').value = song.taal || '';
-        document.getElementById('detScale').value = song.scale || '';
-        document.getElementById('detLyrics').value = song.lyrics || '';
-        document.getElementById('detSwaralipi').value = song.swaralipi || '';
-        document.getElementById('detDesc').value = song.description || '';
-        document.getElementById('detAudioLink').value = song.audioLink || '';
-        
-        setTimeout(() => {
-            autoGrow(document.getElementById('detLyrics'));
-            autoGrow(document.getElementById('detSwaralipi'));
-        }, 50);
-
-        updateAudioPlayer(song.audioLink);
-    }
-
-    function updateSongDetail(field) {
-        const song = appData.songs.find(s => s.id === currentSongId); if(!song) return;
-        if(field === 'taal') song.taal = document.getElementById('detTaal').value;
-        if(field === 'scale') song.scale = document.getElementById('detScale').value;
-        if(field === 'lyrics') song.lyrics = document.getElementById('detLyrics').value;
-        if(field === 'swaralipi') song.swaralipi = document.getElementById('detSwaralipi').value;
-        if(field === 'description') song.description = document.getElementById('detDesc').value;
-        if(field === 'audioLink') {
-            song.audioLink = document.getElementById('detAudioLink').value.trim();
-            updateAudioPlayer(song.audioLink);
-        }
-        saveToStorage();
-    }
-
-    function updateAudioPlayer(link) {
-        const container = document.getElementById('audioPlayContainer');
-        container.innerHTML = '';
-        if(link) {
-            const a = document.createElement('a');
-            a.href = link;
-            a.target = "_blank";
-            a.className = "btn";
-            a.style.display = "inline-block";
-            a.style.marginTop = "5px";
-            a.style.background = "#0288d1";
-            a.innerText = "▶ অডিও/ভিডিও প্লে করুন";
-            container.appendChild(a);
-        }
-    }
-
-    function backToListView() { document.getElementById('detailView').classList.add('hidden'); document.getElementById('listView').classList.remove('hidden'); }
-
-    function handleSearch() {
-        const query = document.getElementById('globalSearch').value.toLowerCase().trim(); if(!query) return;
-        document.getElementById('viewTitle').innerText = `🔍 সার্চ রেজাল্ট: "${query}"`;
-        document.getElementById('itemAddForm').classList.add('hidden');
-        const container = document.getElementById('listContainer'); container.innerHTML = '';
-        appData.songs.filter(song => song.title.toLowerCase().includes(query) || song.category.toLowerCase().includes(query)).forEach(song => {
-            const div = document.createElement('div'); div.className = 'list-item';
-            div.innerHTML = `<span style="font-size:14px;">🎵 ${song.title} <small>(${song.category})</small></span>`;
-            div.onclick = () => { if(song.status !== 'want-to-learn') openSongDetail(song.id); };
-            container.appendChild(div);
-        });
-    }
 </script>
+
+<!-- Service Worker Registration Script -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((error) => {
+      console.error('Service Worker registration failed:', error);
+    });
+  });
+}
+</script>
+
 </body>
 </html>
