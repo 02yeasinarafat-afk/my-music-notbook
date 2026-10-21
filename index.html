@@ -295,14 +295,13 @@
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ⚙️ আপনার ফায়ারবেস কনফিগারেশন
-        const firebaseConfig =  {
+        const firebaseConfig = {
             apiKey: "AIzaSyADSxl61rvEXNArEWyDsjw0Ghn5C5iZcVY",
   authDomain: "ganer-khata.firebaseapp.com",
   projectId: "ganer-khata",
   storageBucket: "ganer-khata.firebasestorage.app",
   messagingSenderId: "902524657457",
   appId: "1:902524657457:web:af7441e3341a1ea8b55a10"        };
-
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -383,7 +382,7 @@
             } else {
                 appData = { categories: ["নজরুল সঙ্গীত", "রবীন্দ্রসঙ্গীত", "লালন গীতি"], songs: [], customLists: { "ফেবারিট": [], "পপুলার": [] } };
             }
-            renderCategories();
+            if(window.renderCategories) window.renderCategories();
         }
     </script>
 </head>
@@ -519,11 +518,12 @@
         const menu = document.getElementById(menuId);
         menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     }
+    window.toggleMenu = toggleMenu;
 
     function switchTab(tabName) {
         currentTab = tabName; currentCategory = null;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        if(event) event.target.classList.add('active');
+        if(window.event && window.event.target) window.event.target.classList.add('active');
         document.getElementById('listContainer').innerHTML = '';
         document.getElementById('itemAddForm').classList.add('hidden');
         
@@ -537,6 +537,7 @@
         }
         backToListView();
     }
+    window.switchTab = switchTab;
 
     function renderCategories() {
         const container = document.getElementById('categoryContainer'); if(!container) return;
@@ -545,40 +546,51 @@
             const div = document.createElement('div');
             div.className = `list-item ${currentCategory === cat ? 'active' : ''}`;
             div.innerHTML = `
-                <span onclick="selectCategory('${cat}', this.parentNode)" style="flex:1;">${cat}</span>
-                <span class="three-dot" onclick="toggleMenu(event, 'catMenu_${index}')">⋮</span>
+                <span onclick="window.selectCategory('${cat}', this.parentNode)" style="flex:1;">${cat}</span>
+                <span class="three-dot" onclick="window.toggleMenu(event, 'catMenu_${index}')">⋮</span>
                 <div id="catMenu_${index}" class="dropdown-menu">
-                    <div onclick="editCategory('${cat}')">⚙️ এডিট করুন</div>
-                    <div onclick="deleteCategory('${cat}')">🗑️ ডিলিট করুন</div>
+                    <div onclick="window.editCategory('${cat}')">⚙️ এডিট করুন</div>
+                    <div onclick="window.deleteCategory('${cat}')">🗑️ ডিলিট করুন</div>
                 </div>
             `;
             container.appendChild(div);
         });
     }
+    window.renderCategories = renderCategories;
 
     function addCategory() {
         const input = document.getElementById('newCatInput'); const name = input.value.trim();
         if(name && !appData.categories.includes(name)) {
-            appData.categories.push(name); saveToStorage(); renderCategories(); input.value = '';
+            appData.categories.push(name); 
+            if(window.saveToStorage) window.saveToStorage(); 
+            renderCategories(); 
+            input.value = '';
         }
     }
+    window.addCategory = addCategory;
 
     function editCategory(oldName) {
         const newName = prompt("ক্যাটাগরির নতুন নাম:", oldName);
         if(newName && newName.trim() !== "" && !appData.categories.includes(newName)) {
             appData.categories = appData.categories.map(c => c === oldName ? newName.trim() : c);
             appData.songs.forEach(s => { if(s.category === oldName) s.category = newName.trim(); });
-            saveToStorage(); renderCategories(); if(currentCategory === oldName) currentCategory = newName;
+            if(window.saveToStorage) window.saveToStorage(); 
+            renderCategories(); 
+            if(currentCategory === oldName) currentCategory = newName;
         }
     }
+    window.editCategory = editCategory;
 
     function deleteCategory(name) {
         if(confirm(`"${name}" ক্যাটাগরি ডিলিট করতে চান?`)) {
             appData.categories = appData.categories.filter(c => c !== name);
             appData.songs = appData.songs.filter(s => s.category !== name);
-            saveToStorage(); renderCategories(); switchTab(currentTab);
+            if(window.saveToStorage) window.saveToStorage(); 
+            renderCategories(); 
+            switchTab(currentTab);
         }
     }
+    window.deleteCategory = deleteCategory;
 
     function selectCategory(cat, element) {
         currentCategory = cat;
@@ -589,12 +601,13 @@
         document.getElementById('itemAddForm').innerHTML = `
             <div style="display:flex; gap:10px;">
                 <input type="text" id="newSongTitle" placeholder="নতুন গানের নাম..." style="margin:0;">
-                <button class="btn" onclick="addSong()">Add</button>
+                <button class="btn" onclick="window.addSong()">Add</button>
             </div>
         `;
         document.getElementById('itemAddForm').classList.remove('hidden');
         renderSongs();
     }
+    window.selectCategory = selectCategory;
 
     function renderSongs() {
         const container = document.getElementById('listContainer'); container.innerHTML = '';
@@ -605,52 +618,69 @@
         filteredSongs.forEach((song, index) => {
             const div = document.createElement('div'); div.className = 'list-item';
             let actionBtn = '';
-            if(currentTab === 'learning') actionBtn = `<button class="btn" style="background:#2ecc71; margin-right:5px; padding:6px 10px; font-size:12px;" onclick="event.stopPropagation(); moveSongStatus('${song.id}', 'learned')">Complete</button>`;
-            if(currentTab === 'want-to-learn') actionBtn = `<button class="btn" style="background:#9b59b6; margin-right:5px; padding:6px 10px; font-size:12px;" onclick="event.stopPropagation(); moveSongStatus('${song.id}', 'learning')">Send</button>`;
+            if(currentTab === 'learning') actionBtn = `<button class="btn" style="background:#2ecc71; margin-right:5px; padding:6px 10px; font-size:12px;" onclick="event.stopPropagation(); window.moveSongStatus('${song.id}', 'learned')">Complete</button>`;
+            if(currentTab === 'want-to-learn') actionBtn = `<button class="btn" style="background:#9b59b6; margin-right:5px; padding:6px 10px; font-size:12px;" onclick="event.stopPropagation(); window.moveSongStatus('${song.id}', 'learning')">Send</button>`;
 
             div.innerHTML = `
-                <span style="font-weight:bold; flex:1; font-size:14px;" onclick="${currentTab !== 'want-to-learn' ? `openSongDetail('\${song.id}')` : ''}">🎵 ${song.title}</span>
+                <span style="font-weight:bold; flex:1; font-size:14px; cursor:pointer;" onclick="${currentTab !== 'want-to-learn' ? `window.openSongDetail('\${song.id}')` : ''}">🎵 ${song.title}</span>
                 <div style="display:flex; align-items:center;">
                     ${actionBtn}
-                    <span class="three-dot" onclick="toggleMenu(event, 'songMenu_${index}')">⋮</span>
+                    <span class="three-dot" onclick="window.toggleMenu(event, 'songMenu_${index}')">⋮</span>
                     <div id="songMenu_${index}" class="dropdown-menu">
-                        ${currentTab !== 'want-to-learn' ? `<div onclick="openPlaylistModal('\${song.id}')">📂 লিস্টে যোগ</div>` : ''}
-                        <div onclick="editSongTitle('${song.id}')">⚙️ এডিট নাম</div>
-                        <div onclick="deleteSong('${song.id}')">🗑️ ডিলিট</div>
+                        ${currentTab !== 'want-to-learn' ? `<div onclick="window.openPlaylistModal('\${song.id}')">📂 লিস্টে যোগ</div>` : ''}
+                        <div onclick="window.editSongTitle('${song.id}')">⚙️ এডিট নাম</div>
+                        <div onclick="window.deleteSong('${song.id}')">🗑️ ডিলিট</div>
                     </div>
                 </div>
             `;
             container.appendChild(div);
         });
     }
+    window.renderSongs = renderSongs;
 
     function addSong() {
         const input = document.getElementById('newSongTitle'); const title = input.value.trim();
         if(!title || !currentCategory) return;
         appData.songs.push({ id: Date.now().toString(), title: title, category: currentCategory, status: currentTab, taal:'', scale:'', lyrics:'', swaralipi:'', description:'', audioLink:'' });
-        saveToStorage(); renderSongs(); input.value = '';
+        if(window.saveToStorage) window.saveToStorage(); 
+        renderSongs(); 
+        input.value = '';
     }
+    window.addSong = addSong;
 
     function editSongTitle(id) {
         const song = appData.songs.find(s => s.id === id);
+        if(!song) return;
         const newTitle = prompt("গানের নতুন নাম:", song.title);
-        if(newTitle && newTitle.trim() !== "") { song.title = newTitle.trim(); saveToStorage(); renderSongs(); }
+        if(newTitle && newTitle.trim() !== "") { 
+            song.title = newTitle.trim(); 
+            if(window.saveToStorage) window.saveToStorage(); 
+            renderSongs(); 
+        }
     }
+    window.editSongTitle = editSongTitle;
 
     function deleteSong(id) {
         if(confirm("গানটি ডিলিট করতে চান?")) {
             appData.songs = appData.songs.filter(s => s.id !== id);
             Object.keys(appData.customLists).forEach(l => appData.customLists[l] = appData.customLists[l].filter(sid => sid !== id));
-            saveToStorage(); renderSongs();
+            if(window.saveToStorage) window.saveToStorage(); 
+            renderSongs();
         }
     }
+    window.deleteSong = deleteSong;
 
     function moveSongStatus(id, newStatus) {
         const song = appData.songs.find(s => s.id === id);
-        if(song) { song.status = newStatus; saveToStorage(); renderSongs(); }
+        if(song) { 
+            song.status = newStatus; 
+            if(window.saveToStorage) window.saveToStorage(); 
+            renderSongs(); 
+        }
     }
+    window.moveSongStatus = moveSongStatus;
 
-    // 🎵 গান খোলার ফাংশন
+    // 🎵 গান খোলার ফিক্সড ফাংশন
     function openSongDetail(id) {
         const song = appData.songs.find(s => s.id === id);
         if(!song) return;
@@ -692,7 +722,7 @@
         if(field === 'description') song.description = document.getElementById('detDesc').value;
         if(field === 'audioLink') song.audioLink = document.getElementById('detAudioLink').value;
 
-        saveToStorage();
+        if(window.saveToStorage) window.saveToStorage();
     }
     window.updateSongDetail = updateSongDetail;
 
@@ -706,21 +736,27 @@
         });
         document.getElementById('playlistModal').style.display = 'flex';
     }
+    window.openPlaylistModal = openPlaylistModal;
 
     function addSongToCustomList(listName) {
         if(!appData.customLists[listName].includes(selectedSongForList)) {
-            appData.customLists[listName].push(selectedSongForList); saveToStorage(); alert("লিস্টে যোগ করা হয়েছে!");
+            appData.customLists[listName].push(selectedSongForList); 
+            if(window.saveToStorage) window.saveToStorage(); 
+            alert("লিস্টে যোগ করা হয়েছে!");
         } else { alert("অলরেডি লিস্টে আছে।"); }
         closeModal();
     }
+    window.addSongToCustomList = addSongToCustomList;
+
     function closeModal() { document.getElementById('playlistModal').style.display = 'none'; }
+    window.closeModal = closeModal;
 
     function renderCustomListsView() {
         document.getElementById('viewTitle').innerText = "📂 কাস্টম প্লে-লিস্টসমূহ";
         document.getElementById('itemAddForm').innerHTML = `
             <div style="display:flex; gap:10px;">
                 <input type="text" id="newListName" placeholder="নতুন লিস্টের নাম..." style="margin:0;">
-                <button class="btn" onclick="createNewList()">Create</button>
+                <button class="btn" onclick="window.createNewList()">Create</button>
             </div>
         `;
         document.getElementById('itemAddForm').classList.remove('hidden');
@@ -728,20 +764,26 @@
         Object.keys(appData.customLists).forEach((listName, index) => {
             const div = document.createElement('div'); div.className = 'list-item';
             div.innerHTML = `
-                <span style="flex:1; font-size:14px;" onclick="openCustomListSongs('${listName}')">📂 ${listName} (${appData.customLists[listName].length} টি গান)</span>
-                <span class="three-dot" onclick="toggleMenu(event, 'listMenu_${index}')">⋮</span>
+                <span style="flex:1; font-size:14px;" onclick="window.openCustomListSongs('${listName}')">📂 ${listName} (${appData.customLists[listName].length} টি গান)</span>
+                <span class="three-dot" onclick="window.toggleMenu(event, 'listMenu_${index}')">⋮</span>
                 <div id="listMenu_${index}" class="dropdown-menu">
-                    <div onclick="deleteCustomList('${listName}')">🗑️ ডিলিট করুন</div>
+                    <div onclick="window.deleteCustomList('${listName}')">🗑️ ডিলিট করুন</div>
                 </div>
             `;
             container.appendChild(div);
         });
     }
+    window.renderCustomListsView = renderCustomListsView;
 
     function createNewList() {
         const input = document.getElementById('newListName'); const name = input.value.trim();
-        if(name && !appData.customLists[name]) { appData.customLists[name] = []; saveToStorage(); renderCustomListsView(); }
+        if(name && !appData.customLists[name]) { 
+            appData.customLists[name] = []; 
+            if(window.saveToStorage) window.saveToStorage(); 
+            renderCustomListsView(); 
+        }
     }
+    window.createNewList = createNewList;
 </script>
 
 <!-- Service Worker Registration -->
