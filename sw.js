@@ -1,59 +1,49 @@
-const CACHE_NAME = 'my-music-notebook-shell-v1';
-const APP_SHELL = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png'];
+const CACHE_NAME = 'music-notebook-v2';
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-512.png'
+];
 
+// Install Event
 self.addEventListener('install', (event) => {
-  event.waitUntil((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    // Cache only this site's static app shell. Firebase/Google sign-in requests are not included.
-    await cache.addAll(APP_SHELL);
-    await self.skipWaiting();
-  })());
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
+  );
+  self.skipWaiting();
 });
 
+// Activate Event
 self.addEventListener('activate', (event) => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.filter((key) => key.startsWith('my-music-notebook-') && key !== CACHE_NAME).map((key) => caches.delete(key)));
-    await self.clients.claim();
-  })());
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
 });
 
+// Fetch Event
 self.addEventListener('fetch', (event) => {
-  const request = event.request;
-  const url = new URL(request.url);
-  // Never intercept Firebase, Google sign-in, or any other cross-origin request.
-  if (url.origin !== self.location.origin || request.method !== 'GET') return;
-
-  // For page navigation, try the network first and fall back to the cached app shell.
-  if (request.mode === 'navigate') {
-    event.respondWith((async () => {
-      try {
-        const response = await fetch(request);
-        if (response && response.ok) {
-          const cache = await caches.open(CACHE_NAME);
-          cache.put('./index.html', response.clone());
-        }
-        return response;
-      } catch (error) {
-        return (await caches.match('./index.html')) || (await caches.match('./'));
-      }
-    })());
+  // Ignore Firebase Network Requests to ensure auth and database work smoothly
+  if (event.request.url.includes('firebase') || event.request.url.includes('googleapis')) {
     return;
   }
 
-  // Cache-first only for same-origin static files; do not cache API/data calls.
-  event.respondWith((async () => {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-    try {
-      const response = await fetch(request);
-      if (response && response.ok && response.type === 'basic') {
-        const cache = await caches.open(CACHE_NAME);
-        cache.put(request, response.clone());
-      }
-      return response;
-    } catch (error) {
-      return Response.error();
-    }
-  })());
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      return cachedResponse || fetch(event.request);
+    })
+  );
 });
