@@ -15,7 +15,6 @@
     <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
     <style>
-
         :root {
             --site-bg: #fdfaf0;
             --header-bg: #2c3e50;
@@ -295,14 +294,15 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ⚙️ আপনার ফায়ারবেস কনফিগারেশন এখানে সঠিক নিয়মে বসিয়ে দিন
-         const firebaseConfig = {
+        // ⚙️ আপনার ফায়ারবেস কনফিগারেশন
+        const firebaseConfig =  {
             apiKey: "AIzaSyADSxl61rvEXNArEWyDsjw0Ghn5C5iZcVY",
   authDomain: "ganer-khata.firebaseapp.com",
   projectId: "ganer-khata",
   storageBucket: "ganer-khata.firebasestorage.app",
   messagingSenderId: "902524657457",
   appId: "1:902524657457:web:af7441e3341a1ea8b55a10"        };
+
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -320,7 +320,7 @@
             const password = document.getElementById('passInput').value;
             
             if(!email) { alert("দয়া করে প্রথমে ইমেইল ঠিকানাটি লিখুন।"); return; }
-            if(!validateEmail(email)) { alert("আপনার ইমেইল ফরম্যাটটি সঠিক নয়! (যেমন: name@example.com)"); return; }
+            if(!validateEmail(email)) { alert("আপনার ইমেইল ফরম্যাটটি সঠিক নয়!"); return; }
             if(!password || password.length < 6) { alert("পাসওয়ার্ডটি অন্তত ৬ অক্ষরের হতে হবে।"); return; }
             
             try {
@@ -337,36 +337,20 @@
 
         window.loginWithGoogle = async () => {
             const provider = new GoogleAuthProvider();
-            try { 
-                await signInWithPopup(auth, provider); 
-            } catch (error) { 
-                if(error.code === 'auth/unauthorized-domain') {
-                    alert("ত্রুটি: এই ডোমেইনটি ফায়ারবেস কনসোলে Authorized করা নেই। অনুগ্রহ করে Firebase Console > Authentication > Settings এ গিয়ে ডোমেইনটি অ্যাড করুন।");
-                } else {
-                    alert("গুগল লগইন ব্যর্থ: " + error.message); 
-                }
-            }
+            try { await signInWithPopup(auth, provider); } catch (error) { alert("গুগল লগইন ব্যর্থ: " + error.message); }
         };
 
         window.loginWithFacebook = async () => {
             const provider = new FacebookAuthProvider();
-            try { 
-                await signInWithPopup(auth, provider); 
-            } catch (error) { 
-                if(error.code === 'auth/unauthorized-domain') {
-                    alert("ত্রুটি: এই ডোমেইনটি ফায়ারবেস কনসোলে Authorized করা নেই।");
-                } else {
-                    alert("ফেসবুক লগইন ব্যর্থ: " + error.message); 
-                }
-            }
+            try { await signInWithPopup(auth, provider); } catch (error) { alert("ফেসবুক লগইন ব্যর্থ: " + error.message); }
         };
 
         window.forgotPassword = async () => {
             const email = document.getElementById('emailInput').value.trim();
-            if (!email || !validateEmail(email)) { alert("পাসওয়ার্ড রিসেট লিংক পেতে প্রথমে উপরের বক্সে সঠিক ইমেইলটি লিখুন।"); return; }
+            if (!email || !validateEmail(email)) { alert("সঠিক ইমেইল দিন।"); return; }
             try {
                 await sendPasswordResetEmail(auth, email);
-                alert("পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে! চেক করুন।");
+                alert("পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে!");
             } catch (error) { alert("ত্রুটি: " + error.message); }
         };
 
@@ -407,7 +391,7 @@
 
 <div id="authContainer">
     <h2>🎵 আমার গানের খাতা 🎶</h2>
-    <p>ক্লাউড ব্যাকআপের জন্য লগইন/রেজিস্ট्रেশন করুন</p>
+    <p>ক্লাউড ব্যাকআপের জন্য লগইন/রেজিস্ট্রেশন করুন</p>
     
     <input type="email" id="emailInput" placeholder="আপনার ইমেইল...">
     <div class="password-wrapper">
@@ -424,14 +408,8 @@
 
     <div class="divider">অথবা সোশ্যাল লগইন</div>
 
-    <button class="social-btn google-btn" onclick="loginWithGoogle()">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-8.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.11 0-5.74-2.11-6.68-4.96H1.21v3.15C3.18 21.88 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.32 14.24c-.24-.72-.38-1.5-.38-2.31s.14-1.59.38-2.31V6.48H1.21C.44 8.04 0 9.79 0 11.64c0 1.85.44 3.6 1.21 5.16l4.11-3.16z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.18 2.12 1.21 5.68l4.11 3.16c.94-2.85 3.57-4.96 6.68-4.96z"/></svg>
-        Continue with Google
-    </button>
-    <button class="social-btn facebook-btn" onclick="loginWithFacebook()">
-        <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-        Continue with Facebook
-    </button>
+    <button class="social-btn google-btn" onclick="loginWithGoogle()">Continue with Google</button>
+    <button class="social-btn facebook-btn" onclick="loginWithFacebook()">Continue with Facebook</button>
 </div>
 
 <div id="appContainer" class="hidden">
@@ -672,6 +650,52 @@
         if(song) { song.status = newStatus; saveToStorage(); renderSongs(); }
     }
 
+    // 🎵 গান খোলার ফাংশন
+    function openSongDetail(id) {
+        const song = appData.songs.find(s => s.id === id);
+        if(!song) return;
+        currentSongId = id;
+        
+        document.getElementById('listView').classList.add('hidden');
+        document.getElementById('detailView').classList.remove('hidden');
+        
+        document.getElementById('detTitle').innerText = `🎵 ${song.title}`;
+        document.getElementById('detTaal').value = song.taal || '';
+        document.getElementById('detScale').value = song.scale || '';
+        document.getElementById('detLyrics').value = song.lyrics || '';
+        document.getElementById('detSwaralipi').value = song.swaralipi || '';
+        document.getElementById('detDesc').value = song.description || '';
+        document.getElementById('detAudioLink').value = song.audioLink || '';
+        
+        setTimeout(() => {
+            document.querySelectorAll('.diary-page textarea').forEach(ta => autoGrow(ta));
+        }, 50);
+    }
+    window.openSongDetail = openSongDetail;
+
+    function backToListView() {
+        document.getElementById('detailView').classList.add('hidden');
+        document.getElementById('listView').classList.remove('hidden');
+        currentSongId = null;
+    }
+    window.backToListView = backToListView;
+
+    function updateSongDetail(field) {
+        if(!currentSongId) return;
+        const song = appData.songs.find(s => s.id === currentSongId);
+        if(!song) return;
+
+        if(field === 'taal') song.taal = document.getElementById('detTaal').value;
+        if(field === 'scale') song.scale = document.getElementById('detScale').value;
+        if(field === 'lyrics') song.lyrics = document.getElementById('detLyrics').value;
+        if(field === 'swaralipi') song.swaralipi = document.getElementById('detSwaralipi').value;
+        if(field === 'description') song.description = document.getElementById('detDesc').value;
+        if(field === 'audioLink') song.audioLink = document.getElementById('detAudioLink').value;
+
+        saveToStorage();
+    }
+    window.updateSongDetail = updateSongDetail;
+
     function openPlaylistModal(songId) {
         selectedSongForList = songId;
         const container = document.getElementById('modalListContainer'); container.innerHTML = '';
@@ -720,7 +744,7 @@
     }
 </script>
 
-<!-- Service Worker Registration Script -->
+<!-- Service Worker Registration -->
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
